@@ -15,22 +15,38 @@ public class PuzzleRequest<T extends Piece> {
     private Callback callback;
     private Result<T> result;
 
-    public Puzzle error(ErrorCallback errorCallback){
-        //TODO
-        return null;
+    public PuzzleRequest(){
+
     }
 
-    public Puzzle success(SuccessCallback successCallback){
-        //TODO
-        return null;
+    public PuzzleRequest<T> error(ErrorCallback errorCallback){
+        this.errorCallback = errorCallback;
+        return this;
+    }
+
+    public PuzzleRequest<T> success(SuccessCallback successCallback){
+        this.successCallback = successCallback;
+        return this;
     }
 
     public void then(Callback callback){
-        //TODO
+        this.callback = callback;
     }
 
     void setResult(Result<T> result, Error error){
-        //TODO
+        if(errorCallback != null && error != null){
+            errorCallback.onError(error);
+        }
+        if(result != null && successCallback != null){
+            successCallback.onSuccess(result);
+        }
+        if(callback != null){
+            if(error != null){
+                callback.onError(error);
+            }else {
+                callback.onSuccess(result);
+            }
+        }
     }
 
 }
