@@ -29,7 +29,7 @@ public class TaskUtil {
         }
     }
 
-    public static <T1, T2, T3> void performTask(AsyncTask<T1, T2, T3> task, T1 params){
+    public static <T1, T2, T3> void performTask(AsyncTask<T1, T2, T3> task, T1[] params){
         if(isOnUIThread()){
             task.execute(params);
         }else{

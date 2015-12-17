@@ -2,6 +2,7 @@ package com.chrynan.puzzle.model;
 
 import android.graphics.Bitmap;
 
+import com.chrynan.puzzle.Storage;
 import com.chrynan.puzzle.interfaces.Piece;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
@@ -31,6 +32,7 @@ public class Project extends SugarRecord implements Piece, Serializable {
     private List<Track> tracks;
     private long lat;
     private long lon;
+    private Track masterTrack;
 
     public Project(){
         this.contributers = new ArrayList<>();
@@ -133,6 +135,10 @@ public class Project extends SugarRecord implements Piece, Serializable {
     }
 
     public List<Bitmap> getPictures() {
+        if(pictures == null || pictures.size() < 1){
+            pictures = new ArrayList<>();
+            pictures.addAll(Storage.getBitmaps(this));
+        }
         return pictures;
     }
 
@@ -244,6 +250,7 @@ public class Project extends SugarRecord implements Piece, Serializable {
             }
             obj.put("lat", lat);
             obj.put("lon", lon);
+            return obj;
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -256,6 +263,14 @@ public class Project extends SugarRecord implements Piece, Serializable {
             return obj.toString();
         }
         return this.toString();
+    }
+
+    public Track getMasterTrack() {
+        return masterTrack;
+    }
+
+    public void setMasterTrack(Track masterTrack) {
+        this.masterTrack = masterTrack;
     }
 
 }

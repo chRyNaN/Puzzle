@@ -25,13 +25,39 @@ public class Puzzle {
         this.context = context;
     }
 
-    public PuzzleRequest<Project> pieceTogether(Project project){
-        //TODO
-        return null;
+    public PuzzleRequest<Project> pieceTogether(final Project project){
+        final PuzzleRequest<Project> request = new PuzzleRequest<>();
+        TaskUtil.performTask(new AsyncTask<Void, Void, Project>() {
+            @Override
+            protected Project doInBackground(Void... params) {
+                try {
+                    //Save the Entity to the database
+                    project.save();
+                    //Save all the bitmap files that were not already saved
+                    Storage.saveAllBitmaps(project);
+                    //Save all the audio files that were not already saved
+                    Storage.saveAllTracks(project);
+                    return project;
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Project p){
+                if(p == null){
+                    request.setResult(null, new Error());
+                }else{
+                    Result<Project> result = new Result<>(project);
+                    request.setResult(result, null);
+                }
+            }
+        });
+        return request;
     }
 
     public <T extends Piece> PuzzleRequest<T> findPiece(final Long id, final Class<T> piece){
-        final PuzzleRequest<T> request = new PuzzleRequest();
+        final PuzzleRequest<T> request = new PuzzleRequest<>();
         TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
             @Override
             protected List<T> doInBackground(Void... params) {
@@ -58,7 +84,7 @@ public class Puzzle {
     }
 
     public <T extends Piece> PuzzleRequest<T> getPieces(final Class<T> piece){
-        final PuzzleRequest<T> request = new PuzzleRequest();
+        final PuzzleRequest<T> request = new PuzzleRequest<>();
         TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
             @Override
             protected List<T> doInBackground(Void... params) {
@@ -85,7 +111,7 @@ public class Puzzle {
     }
 
     public <T extends Piece> PuzzleRequest<T> removePiece(final Long id, final Class<T> piece){
-        final PuzzleRequest<T> request = new PuzzleRequest();
+        final PuzzleRequest<T> request = new PuzzleRequest<>();
         TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
             @Override
             protected List<T> doInBackground(Void... params) {
