@@ -2,6 +2,8 @@ package com.chrynan.puzzle;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.chrynan.puzzle.interfaces.Piece;
 import com.chrynan.puzzle.model.Project;
@@ -27,7 +29,7 @@ public class Puzzle {
 
     public PuzzleRequest<Project> pieceTogether(final Project project){
         final PuzzleRequest<Project> request = new PuzzleRequest<>();
-        TaskUtil.performTask(new AsyncTask<Void, Void, Project>() {
+        TaskUtil.performVoidParameterTask(new AsyncTask<Void, Void, Project>() {
             @Override
             protected Project doInBackground(Void... params) {
                 try {
@@ -38,18 +40,19 @@ public class Puzzle {
                     //Save all the audio files that were not already saved
                     Storage.saveAllTracks(project);
                     return project;
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return null;
             }
+
             @Override
-            protected void onPostExecute(Project p){
-                if(p == null){
-                    request.setResult(null, new Error());
-                }else{
+            protected void onPostExecute(Project p) {
+                if (p == null) {
+                    setResult(request, null, new Error());
+                } else {
                     Result<Project> result = new Result<>(project);
-                    request.setResult(result, null);
+                    setResult(request, result, null);
                 }
             }
         });
@@ -58,25 +61,26 @@ public class Puzzle {
 
     public <T extends Piece> PuzzleRequest<T> findPiece(final Long id, final Class<T> piece){
         final PuzzleRequest<T> request = new PuzzleRequest<>();
-        TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
+        TaskUtil.performVoidParameterTask(new AsyncTask<Void, Void, List<T>>() {
             @Override
             protected List<T> doInBackground(Void... params) {
                 try {
                     List<T> pieces = Select.from(piece).where(Condition.prop("id").eq(id)).list();
                     return pieces;
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    request.setResult(null, new Error());
+                    setResult(request, null, new Error());
                 }
                 return null;
             }
+
             @Override
-            protected void onPostExecute(List<T> pieces){
-                if(pieces != null && pieces.size() > 0){
+            protected void onPostExecute(List<T> pieces) {
+                if (pieces != null && pieces.size() > 0) {
                     Result<T> result = new Result<>(pieces);
-                    request.setResult(result, null);
-                }else if(pieces != null){
-                    request.setResult(new Result<T>(), null);
+                    setResult(request, result, null);
+                } else if (pieces != null) {
+                    setResult(request, new Result<T>(), null);
                 }
             }
         });
@@ -85,25 +89,26 @@ public class Puzzle {
 
     public <T extends Piece> PuzzleRequest<T> getPieces(final Class<T> piece){
         final PuzzleRequest<T> request = new PuzzleRequest<>();
-        TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
+        TaskUtil.performVoidParameterTask(new AsyncTask<Void, Void, List<T>>() {
             @Override
             protected List<T> doInBackground(Void... params) {
                 try {
                     List<T> pieces = Select.from(piece).list();
                     return pieces;
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                    request.setResult(null, new Error());
+                    setResult(request, null, new Error());
                 }
                 return null;
             }
+
             @Override
-            protected void onPostExecute(List<T> pieces){
-                if(pieces != null && pieces.size() > 0){
+            protected void onPostExecute(List<T> pieces) {
+                if (pieces != null && pieces.size() > 0) {
                     Result<T> result = new Result<>(pieces);
-                    request.setResult(result, null);
-                }else if(pieces != null){
-                    request.setResult(new Result<T>(), null);
+                    setResult(request, result, null);
+                } else if (pieces != null) {
+                    setResult(request, new Result<T>(), null);
                 }
             }
         });
@@ -112,28 +117,29 @@ public class Puzzle {
 
     public <T extends Piece> PuzzleRequest<T> removePiece(final Long id, final Class<T> piece){
         final PuzzleRequest<T> request = new PuzzleRequest<>();
-        TaskUtil.performTask(new AsyncTask<Void, Void, List<T>>(){
+        TaskUtil.performVoidParameterTask(new AsyncTask<Void, Void, List<T>>() {
             @Override
             protected List<T> doInBackground(Void... params) {
                 try {
                     List<T> pieces = Select.from(piece).where(Condition.prop("id").eq(id)).list();
-                    if(pieces != null && pieces.size() > 0) {
+                    if (pieces != null && pieces.size() > 0) {
                         T p = pieces.get(0);
                         ((SugarRecord) p).delete();
                     }
                     return pieces;
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return null;
             }
+
             @Override
-            protected void onPostExecute(List<T> pieces){
-                if(pieces != null && pieces.size() > 0){
+            protected void onPostExecute(List<T> pieces) {
+                if (pieces != null && pieces.size() > 0) {
                     Result<T> result = new Result<>(pieces);
-                    request.setResult(result, null);
-                }else{
-                    request.setResult(null, new Error());
+                    setResult(request, result, null);
+                } else {
+                    setResult(request, null, new Error());
                 }
             }
         });
@@ -171,6 +177,23 @@ public class Puzzle {
             }
         }
         return singleton;
+    }
+
+    private <T extends Piece> void setResult(final PuzzleRequest<T> request, final Result<T> result, final Error error){
+        if(TaskUtil.isOnUIThread()){
+            if(request != null){
+                request.setResult(result, error);
+            }
+        }else{
+            Handler h = new Handler(Looper.getMainLooper());
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    request.setResult(result, error);
+                }
+            };
+            h.post(runnable);
+        }
     }
 
 }

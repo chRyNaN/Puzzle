@@ -2,7 +2,23 @@
 
     <application android:allowBackup="true" android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme">
-
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <provider
+            android:authorities="com.chrynan.puzzle.puzzleprovider"
+            android:name="com.chrynan.puzzle.PuzzleProvider"
+            android:exported="true">
+        </provider>
+        <activity
+            android:name=".ProjectPickerActivity"
+            android:label="Choose Projects"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

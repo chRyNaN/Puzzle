@@ -13,7 +13,7 @@ public class TaskUtil {
         return Looper.myLooper() == Looper.getMainLooper();
     }
 
-    public static void performTask(AsyncTask task){
+    public static <T> void performVoidParameterTask(final AsyncTask<Void, Void, T> task){
         if(isOnUIThread()){
             task.execute();
         }else{
@@ -29,7 +29,23 @@ public class TaskUtil {
         }
     }
 
-    public static <T1, T2, T3> void performTask(AsyncTask<T1, T2, T3> task, T1[] params){
+    public static <T1, T2, T3> void performTask(final AsyncTask<T1, T2, T3> task){
+        if(isOnUIThread()){
+            task.execute();
+        }else{
+            //Not on UI/Main Thread so launch from it explicitly
+            Handler h = new Handler(Looper.getMainLooper());
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    task.execute();
+                }
+            };
+            h.post(runnable);
+        }
+    }
+
+    public static <T1, T2, T3> void performTask(final AsyncTask<T1, T2, T3> task, final T1[] params){
         if(isOnUIThread()){
             task.execute(params);
         }else{
