@@ -10,7 +10,6 @@
         </provider>
         <activity
             android:name=".ProjectPickerActivity"
-            android:label="Choose Projects"
             android:exported="true"
             android:launchMode="singleTop"
             android:configChanges="orientation|screenSize">

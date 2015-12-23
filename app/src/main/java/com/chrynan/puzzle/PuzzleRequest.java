@@ -14,6 +14,7 @@ public class PuzzleRequest<T extends Piece> {
     private SuccessCallback successCallback;
     private Callback callback;
     private Result<T> result;
+    private Error error;
 
     public PuzzleRequest(){
 
@@ -21,19 +22,36 @@ public class PuzzleRequest<T extends Piece> {
 
     public PuzzleRequest<T> error(ErrorCallback errorCallback){
         this.errorCallback = errorCallback;
+        if(error != null){
+            this.errorCallback.onError(error);
+            this.error = null;
+        }
         return this;
     }
 
     public PuzzleRequest<T> success(SuccessCallback successCallback){
         this.successCallback = successCallback;
+        if(result != null){
+            this.successCallback.onSuccess(result);
+            this.result = null;
+        }
         return this;
     }
 
     public void then(Callback callback){
         this.callback = callback;
+        if(error != null){
+            this.callback.onError(error);
+        }else if(result != null){
+            this.callback.onSuccess(result);
+        }
+        this.result = null;
+        this.error = null;
     }
 
     void setResult(Result<T> result, Error error){
+        this.result = result;
+        this.error = error;
         if(errorCallback != null && error != null){
             errorCallback.onError(error);
         }
