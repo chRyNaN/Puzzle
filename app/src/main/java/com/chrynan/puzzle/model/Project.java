@@ -27,6 +27,7 @@ public class Project extends SugarRecord implements Piece, Serializable {
     private long length;
     private List<Artist> contributers;
     private List<Note> notes;
+    private List<Extra> extras;
     @Ignore
     private List<Bitmap> pictures;
     private List<Track> tracks;
@@ -40,6 +41,7 @@ public class Project extends SugarRecord implements Piece, Serializable {
         this.pictures = new ArrayList<>();
         this.tracks = new ArrayList<>();
         this.createdDate = new Date();
+        this.extras = new ArrayList<>();
     }
 
     public Long getId() {
@@ -211,6 +213,7 @@ public class Project extends SugarRecord implements Piece, Serializable {
                 ", notes=" + notes +
                 ", pictures=" + pictures +
                 ", tracks=" + tracks +
+                ", extras=" + extras +
                 ", lat=" + lat +
                 ", lon=" + lon +
                 '}';
@@ -248,6 +251,13 @@ public class Project extends SugarRecord implements Piece, Serializable {
                 }
                 obj.put("tracks", tArray);
             }
+            if(extras != null){
+                JSONArray eArray = new JSONArray();
+                for(Extra e : extras){
+                    eArray.put(e.toJSON());
+                }
+                obj.put("extras", eArray);
+            }
             obj.put("lat", lat);
             obj.put("lon", lon);
             return obj;
@@ -271,6 +281,28 @@ public class Project extends SugarRecord implements Piece, Serializable {
 
     public void setMasterTrack(Track masterTrack) {
         this.masterTrack = masterTrack;
+    }
+
+    public List<Extra> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(List<Extra> extras) {
+        this.extras = extras;
+    }
+
+    public void addExtra(Extra extra){
+        if(extras == null){
+            extras = new ArrayList<>();
+        }
+        extras.add(extra);
+    }
+
+    public boolean removeExtra(Extra extra){
+        if(extras != null){
+            return extras.remove(extra);
+        }
+        return false;
     }
 
 }

@@ -39,6 +39,8 @@ public class Puzzle {
                     Storage.saveAllBitmaps(project);
                     //Save all the audio files that were not already saved
                     Storage.saveAllTracks(project);
+                    //Save all the extra files that were not already saved
+                    Storage.saveAllExtras(project);
                     return project;
                 } catch (Exception e) {
                     e.printStackTrace();

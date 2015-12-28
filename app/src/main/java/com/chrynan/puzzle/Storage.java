@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import com.chrynan.puzzle.model.Clip;
+import com.chrynan.puzzle.model.Extra;
 import com.chrynan.puzzle.model.Project;
 import com.chrynan.puzzle.model.Track;
 
@@ -74,7 +75,7 @@ public class Storage {
             for(Clip c : t.getClips()){
                 if(!containsAudioFile(p, new File(c.getFileLocation()))){
                     //Doesn't already contain the audio file in the project directory, so move it to the project directory
-                    moveFile(new File(c.getFileLocation()), new File(getAudioFolder(p), c.getName() + "_" + c.getId()));
+                    files.add(moveFile(new File(c.getFileLocation()), new File(getAudioFolder(p), c.getName() + "_" + c.getId())));
                 }
             }
         }
@@ -84,7 +85,27 @@ public class Storage {
                 moveFile(f, new File(getProjectFolder(p), "master_" + p.getMasterTrack().getName() + "_" + p.getMasterTrack().getId()));
             }
         }
-        return null;
+        return files;
+    }
+
+    public static boolean containsExtraFile(Project p, File file){
+        if(isInProjectDirectory(p, file)){
+            File f = new File(getExtraFolder(p), file.getName());
+            if(f != null && f.exists()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static List<File> saveAllExtras(Project p){
+        List<File> files = new ArrayList<>();
+        for(Extra e : p.getExtras()){
+            if(!containsExtraFile(p, new File(e.getFileLocation()))){
+                files.add(moveFile(new File(e.getFileLocation()), new File(getExtraFolder(p), e.getName() + "_" + e.getId())));
+            }
+        }
+        return files;
     }
 
     public static File saveBitmap(Project p, Bitmap b, String name){
